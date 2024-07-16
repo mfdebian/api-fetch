@@ -1,35 +1,11 @@
 <h1>Users</h1>
 
 <% if @users.present? %>
-  <ol>
+  <ul>
     <% @users.each do |user| %>
-      <li>
-        <ul>
-          <li>
-            <strong>Full name:</strong>
-            <%= user.name %>
-          </li>
-          <li>
-            <strong>Username:</strong>
-            <%= user.username %>
-          </li>
-          <li>
-            <strong>Email:</strong>
-            <%= user.email %>
-          </li>
-          <li>
-            <strong>Phone number:</strong>
-            <%= user.phone %>
-          </li>
-          <li>
-            <strong>Personal website:</strong>
-            <%= user.website %>
-          </li>
-        </ul>
-        <br />
-      </li>
+      <li><%= link_to user.name, user %></li>
     <% end %>
-  </ol>
+  </ul>
 <% else %>
   <p>No users found.</p>
 <% end %>
