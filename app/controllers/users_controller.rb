@@ -47,10 +47,20 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    @user.destroy
-    respond_to do |format|
-      format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
-      format.json { head :no_content }
+    @user = User.find(params[:id])
+    response = FetchUsersService.destroy_user(@user.id)
+
+    if response[:status] == 200
+      @user.destroy
+      respond_to do |format|
+        format.html { redirect_to users_url, notice: response[:message] }
+        format.json { head :no_content }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to users_url, alert: response[:message] }
+        format.json { render json: { error: response[:message] }, status: :unprocessable_entity }
+      end
     end
   end
 

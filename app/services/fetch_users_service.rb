@@ -46,6 +46,13 @@ class FetchUsersService
     updated_user
   end
 
+  def self.destroy(id)
+    response = destroy_user(id)
+    if response[:status] == 200
+      response
+    end
+  end
+
   private
     def self.fetch_users
       url = URI.parse(BASE_URL)
@@ -65,7 +72,7 @@ class FetchUsersService
     end
 
     def self.update_user(user, user_params)
-      # faking the id in the API
+      # faking the id for the API
       url = URI.parse("#{BASE_URL}/1")
       http = Net::HTTP.new(url.host)
       request = Net::HTTP::Put.new(url.path, {'Content-Type' => 'application/json'})
@@ -80,5 +87,20 @@ class FetchUsersService
       parsed_response['id'] = user.id
 
       parsed_response
+    end
+
+    def self.destroy_user(id)
+      # faking the id for the API
+      url = URI.parse("#{BASE_URL}/1")
+      http = Net::HTTP.new(url.host)
+      request = Net::HTTP::Delete.new(url.path, {'Content-Type' => 'application/json'})
+
+      response = http.request(request)
+
+      if response.is_a?(Net::HTTPSuccess)
+        { status: 200, message: "Deleted user with id #{id}" }
+      else
+        { status: response.code.to_i, message: "Failed to delete user with id #{id}" }
+      end
     end
 end
