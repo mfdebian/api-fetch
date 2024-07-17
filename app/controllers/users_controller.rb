@@ -2,7 +2,20 @@ class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   def index
-    @users = FetchUsersService.call
+    users_from_api = FetchUsersService.call
+
+    users_from_api.each do |api_user|
+      user = User.find_or_initialize_by(id: api_user['id'])
+      user.update(
+        name: api_user['name'],
+        username: api_user['username'],
+        email: api_user['email'],
+        phone: api_user['phone'],
+        website: api_user['website']
+      )
+    end
+
+    @users = User.all
   end
 
   def show
@@ -13,7 +26,15 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = FetchUsersService.create(user_params)
+    user_data = FetchUsersService.create(user_params)
+
+    @user = User.new(
+      name: user_data['name'],
+      username: user_data['username'],
+      email: user_data['email'],
+      phone: user_data['phone'],
+      website: user_data['website']
+    )
 
     respond_to do |format|
       if @user.save
@@ -31,15 +52,19 @@ class UsersController < ApplicationController
   end
 
   def update
-    updated_user = FetchUsersService.update(@user, user_params)
+    updated_user_data = FetchUsersService.update(@user, user_params)
 
-    if updated_user.present?
-      respond_to do |format|
-        format.html { redirect_to user_url(updated_user), notice: 'User was successfully updated.' }
-        format.json { render :show, status: :ok, location: updated_user }
-      end
-    else
-      respond_to do |format|
+    respond_to do |format|
+      if @user.update(
+          name: updated_user_data['name'],
+          username: updated_user_data['username'],
+          email: updated_user_data['email'],
+          phone: updated_user_data['phone'],
+          website: updated_user_data['website']
+        )
+        format.html { redirect_to user_url(@user), notice: 'User was successfully updated.' }
+        format.json { render :show, status: :ok, location: @user }
+      else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @user.errors, status: :unprocessable_entity }
       end
@@ -48,7 +73,7 @@ class UsersController < ApplicationController
 
   def destroy
     @user = User.find(params[:id])
-    response = FetchUsersService.destroy_user(@user.id)
+    response = FetchUsersService.destroy(@user.id)
 
     if response[:status] == 200
       @user.destroy
