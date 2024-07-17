@@ -32,6 +32,20 @@ class FetchUsersService
     )
   end
 
+  def self.update(user, user_params)
+    updated_user_data = update_user(user, user_params)
+
+    updated_user = User.find_by(id: updated_user_data['id'])
+    updated_user.update(
+      name: updated_user_data['name'],
+      username: updated_user_data['username'],
+      email: updated_user_data['email'],
+      phone: updated_user_data['phone'],
+      website: updated_user_data['website']
+    )
+    updated_user
+  end
+
   private
     def self.fetch_users
       url = URI.parse(BASE_URL)
@@ -48,5 +62,23 @@ class FetchUsersService
       response = http.request(request)
 
       JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
+    end
+
+    def self.update_user(user, user_params)
+      # faking the id in the API
+      url = URI.parse("#{BASE_URL}/1")
+      http = Net::HTTP.new(url.host)
+      request = Net::HTTP::Put.new(url.path, {'Content-Type' => 'application/json'})
+
+      request.body = user_params.to_json
+
+      response = http.request(request)
+
+      parsed_response = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
+
+      # returning our user's id
+      parsed_response['id'] = user.id
+
+      parsed_response
     end
 end

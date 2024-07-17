@@ -31,11 +31,15 @@ class UsersController < ApplicationController
   end
 
   def update
-    respond_to do |format|
-      if @user.update(user_params)
-        format.html { redirect_to user_url(@user), notice: 'User was successfully updated.' }
-        format.json { render :show, status: :ok, location: @user }
-      else
+    updated_user = FetchUsersService.update(@user, user_params)
+
+    if updated_user.present?
+      respond_to do |format|
+        format.html { redirect_to user_url(updated_user), notice: 'User was successfully updated.' }
+        format.json { render :show, status: :ok, location: updated_user }
+      end
+    else
+      respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @user.errors, status: :unprocessable_entity }
       end
