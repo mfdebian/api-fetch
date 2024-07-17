@@ -25,6 +25,19 @@
   </ul>
 
   <div>
+    <%= link_to 'Edit user', edit_user_path(@user) %>
+  </div>
+  <br />
+  <div>
+    <%= link_to 'Delete user', user_path(@user),
+      data: {
+        turbo_method: :delete,
+        turbo_confirm: "Are you sure?"
+      }
+    %>
+  </div>
+  <br />
+  <div>
     <%= link_to "Back to users", users_path %>
   </div>
 </main>
